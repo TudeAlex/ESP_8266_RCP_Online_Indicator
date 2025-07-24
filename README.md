@@ -52,3 +52,4 @@ To perform different actions during the login or status-check process, you can a
 
 Code was used and tested only with Polish version of website, to make it work for English version it is necessary to modify the methods extractPresenceStatus() and ledDriver
 
+
