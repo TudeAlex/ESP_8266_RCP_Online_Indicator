@@ -12,7 +12,7 @@ Created as part of a university internship – this is not a commercial product.
 ## HOW_TO_USE_IT
 
 To use Code you must enter SSID and pasword of your wifi, and email and password to your RCP account to  'secrets.cpp'.  
-Next upload 'RCP_Project_Public.ino' to your ESP8266. All of the files in this repository (without README obviusly), must be in same folder named 'RCP_Project_Public' (you can change it but it must be the same as .ino file). 
+Next upload 'RCP_Project_Public.ino' to your ESP8266. All of the files in this repository (without README obviusly), must be in same folder named 'RCP_Project_Public' (you can change it but it must be the same as .ino file). To ensure proper operation of the device, all libraries listed in the `LIBRARIES` section must be installed in the Arduino IDE.
 There is 4 types of presence status, if device succesfuly logged into your account, the device will set the designated outputs to high depending on the status:
 For programmers: 
 - **On site** output 12
@@ -27,16 +27,28 @@ For user:
 
 ## USING_WITH_TERMINAL_MENU
 
-device can be used with menu in terminal, but you 
+The menu usage is guided by in-code comments marked with <pre> ``` *** comment *** ``` </pre>. Follow these annotations step by step to ensure proper operation.
 
-## HOW_TO_BUILD_IT
+## LIBRARIES
 
-The installation instructions for the device and the LED module will be included (or not).
+Libraries used for project:
+
+- **ESP8266WiFi.h**
+- **WiFiClientSecure.h**
+- **ESP8266HTTPClient.h**
+
+
+## ADDING_FEATERS
+
+Functions related to retrieving additional data from the RCP panel can be implemented by modifying the `externPresenceStatus` method. This method handles the response from the server when requesting the endpoint `GetMyStatus0`.
+
+The response message contains at least the following additional information:
+- **Total work time**
+- **Time of the last activity**
+
+To perform different actions during the login or status-check process, you can also create a modified version of the `getMyStatus0()` method. Its parameters should match those required for the desired request.
 
 ## IMPORTANT
 
 Code was used and tested only with Polish version of website, to make it work for English version it is necessary to modify the methods extractPresenceStatus() and ledDriver
 
-## ADDING_FEATERS
-
-Initially, the device was to be operated by the user from the menu, so there are methods in code that allows you use device with control menu
