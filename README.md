@@ -8,15 +8,15 @@ To use Code you must enter SSID and pasword of your wifi, and email and password
 Next step is to upload RCP_Project_Public.ino to your ESP8266. 
 There is 4 types of presence status, if device succesfuly logged into your account, the device will set the designated outputs to high depending on the status:
 for programmers: 
--On site (output 12)
--On break (output 13)
--On business exit (output 14)
--Away (output 15)
+*On site (output 12)
+*On break (output 13)
+*On business exit (output 14)
+*Away (output 15)
 for user:
--On site (D6)
--On break (D7)
--On business exit (D5)
--Away (D8)
+*On site (D6)
+*On break (D7)
+*On business exit (D5)
+*Away (D8)
 
 #HOW_TO_BUILD_IT
 
