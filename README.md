@@ -1,8 +1,15 @@
   #ESP_8266_RCP_Online_Indicator 
 
-This project is designet to signal presence status with LED, using request to https://panel.rcponline.pl. 
+This project is designet to signal presence status with LED, using request to https://panel.rcponline.pl.
 
-#HOW_TO_USE_IT
+## Author
+
+This project was developed by a student intern during a summer internship, with the aim of gaining practical experience in embedded systems and network communication.
+
+Created as part of a university internship – this is not a commercial product.
+
+
+## HOW_TO_USE_IT
 
 To use Code you must enter SSID and pasword of your wifi, and email and password to your RCP account to  'secrets.cpp'.  
 Next upload 'RCP_Project_Public.ino' to your ESP8266. All of the files in this repository (without README obviusly), must be in same folder named 'RCP_Project_Public' (you can change it but it must be the same as .ino file). 
