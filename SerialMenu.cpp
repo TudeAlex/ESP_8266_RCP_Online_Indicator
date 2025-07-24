@@ -1,4 +1,3 @@
-#include "core_esp8266_features.h"
 #include <ESP8266WiFi.h>
 #include "SerialMenu.h"
 #include "DataStream.h"
@@ -19,23 +18,9 @@ MyWiFi& SerialMenu::getWiFi()
   return wifi;
 }
 
-// void SerialMenu::echoInput()
-// {
-//   String c;
-//   while(c != "\r")
-//   {
-//   if(Serial.available())
-//   {
-//     char c = Serial.read();
-//     Serial.write(c);
-//   }
-//   }
-// }
-
 void SerialMenu::printMainMenu()
 {
   Serial.println("Choose one of the options below:");
-  // Serial.println("Options:");
   Serial.println("1-Enter SSID");
   Serial.println("2-Enter WI-FI Password");
   Serial.println("3-Enter Email");
@@ -49,21 +34,18 @@ void SerialMenu::printMainMenu()
 void SerialMenu::handleMainMenu()
 {
 
-  // handleWiFiConnection();
-  // handleDataStream();
   if (Serial.available() > 0) 
   { 
-    // echoInput();
     String input = Serial.readStringUntil('\r');
-    input.trim();
-    // Serial.println(input);  
+    input.trim(); 
+
     if(input == "1")
     {    
-      handleWifiSSIDMenu();
+      handleWifiSsidMenu();
     }
     else if(input == "2")
     {
-      handleWifiPASSMenu();
+      handleWifiPasswordMenu();
     }
     else if (input == "3")
     {
@@ -94,7 +76,7 @@ void SerialMenu::handleMainMenu()
 
 
 
-void SerialMenu::handleWifiSSIDMenu()
+void SerialMenu::handleWifiSsidMenu()
 { 
 
   int timer;
@@ -110,23 +92,24 @@ void SerialMenu::handleWifiSSIDMenu()
   {
     if(Serial.available() > 0)
     {
-      // echoInput();
       String ssidInput = Serial.readStringUntil('\r');
       ssidInput.trim();
       if (ssidInput == "q")
       {
         Serial.println("You leave");
+        Serial.println("");
         i++;
       }
       else
       {
       wifi.setSsid(ssidInput);
-      Serial.println("Ssid:" + wifi.getSsid());
+      Serial.println("Entered SSID: " + wifi.getSsid());
+      Serial.println("");
       i++;
       }
     }
   }
-  printMainMenu();
+   printMainMenu();
 }
 
 
@@ -139,25 +122,25 @@ void SerialMenu::handleEmailMenu()
   currtimer = timer;
   int i = 0;
 
-  Serial.println("Enter email. After 10 seconds without activity you will be returned to main menu");
+  Serial.println("Enter E-mail. After 10 seconds without activity you will be returned to main menu");
   Serial.println("Enter q to leave");
 
   while((currtimer-timer) < 10000 && i == 0)
   {
     if(Serial.available() > 0)
     {
-      // echoInput();
-      String passwordInput = Serial.readStringUntil('\r');
-      passwordInput.trim();
-      if (passwordInput == "q")
+      String emailInput = Serial.readStringUntil('\r');
+      emailInput.trim();
+      if (emailInput == "q")
       {
         Serial.println("You leave");
+        Serial.println("");
         i++;
       }
       else
       {
-      wifi.setEmail(passwordInput);
-      Serial.println("Password:" + wifi.getEmail());
+      wifi.setEmail(emailInput);
+      Serial.println("Entered E-mail:" + wifi.getEmail());
       i++;
       }
     }
@@ -173,25 +156,25 @@ void SerialMenu::handleEmailPasswordMenu()
   currtimer = timer;
   int i = 0;
 
-  Serial.println("Enter email. After 10 seconds without activity you will be returned to main menu");
+  Serial.println("Enter password to your RCP account. After 10 seconds without activity you will be returned to main menu");
   Serial.println("Enter q to leave");
 
   while((currtimer-timer) < 10000 && i == 0)
   {
     if(Serial.available() > 0)
     {
-      // echoInput();
-      String passwordInput = Serial.readStringUntil('\r');
-      passwordInput.trim();
-      if (passwordInput == "q")
+      String accountPasswordInput = Serial.readStringUntil('\r');
+      accountPasswordInput.trim();
+      if (accountPasswordInput == "q")
       {
         Serial.println("You leave");
         i++;
       }
       else
       {
-      wifi.setEmailPassword(passwordInput);
-      // Serial.println(wifi.getEmailPassword());
+      wifi.setEmailPassword(accountPasswordInput);
+      // Serial.println(wifi.getEmailPassword());                  /// Here you can change code to make print password after enterning the password
+      // Serial.println("");                                       ///
       i++;
       }
     }
@@ -199,7 +182,7 @@ void SerialMenu::handleEmailPasswordMenu()
   printMainMenu();
 }
 
-void SerialMenu::handleWifiPASSMenu()
+void SerialMenu::handleWifiPasswordMenu()
 {
   int timer;
   int currtimer;
@@ -207,25 +190,25 @@ void SerialMenu::handleWifiPASSMenu()
   currtimer = timer;
   int i = 0;
 
-  Serial.println("Enter WiFI. After 10 seconds without activity you will be returned to main menu");
+  Serial.println("Enter password to Wi-Fi. After 10 seconds without activity you will be returned to main menu");
   Serial.println("Enter q to leave");
 
   while((currtimer-timer) < 10000 && i == 0)
   {
     if(Serial.available() > 0)
     {
-      // echoInput();
-      String passwordInput = Serial.readStringUntil('\r');
-      passwordInput.trim();
-      if (passwordInput == "q")
+      String wifiPasswordInput = Serial.readStringUntil('\r');
+      wifiPasswordInput.trim();
+      if (wifiPasswordInput == "q")
       {
         Serial.println("You leave");
         i++;
       }
       else
       {
-      wifi.setPassword(passwordInput);
-      Serial.println("Password:" + wifi.getPassword());
+      wifi.setPassword(wifiPasswordInput);
+      Serial.println("Entered password to Wi-Fi:" + wifi.getPassword());
+      Serial.println("");
       i++;
       }
     }
@@ -235,11 +218,9 @@ void SerialMenu::handleWifiPASSMenu()
 
 void SerialMenu::handleWiFiConnection()
 {
-  WiFi.begin(WIFI_SSID ,WIFI_PASSWORD); //  
-  // WiFiClientSecure client;
-  // client.setInsecure();
+  WiFi.begin(WIFI_SSID ,WIFI_PASSWORD);  
   unsigned long start = millis();
-  Serial.println("Connecting with WI-FI");
+  Serial.println("Connecting with Wi-Fi");
   while (WiFi.status() != WL_CONNECTED && millis()-start < 20000)
   {
     Serial.print(".");
@@ -260,12 +241,12 @@ void SerialMenu:: handleDataStream()
 {
   if(WL_CONNECTED == WiFi.status())
   {
-  DataStream stream(  wifi.getSsid(),wifi.getPassword() ,EMAIL_ADDRESS , EMAIL_PASSWORD ,"","","");  //     wifi.getSsid() wifi.getPassword()  wifi.getEmail() wifi.getEmailPassword()
+  DataStream stream(  wifi.getSsid(),wifi.getPassword() ,EMAIL_ADDRESS , EMAIL_PASSWORD ,"","","");  //     *** if you want to use menu in terminal: EMAIL_ADDRESS -> wifi.getEmail() , EMAIL_PASSWORD -> wifi.getEmailPassword() ***
   stream.rcpLoop();
   }
   else 
   {
-  Serial.println("No WIFI Connection. Operation is not allowed");
+  Serial.println("No Wi-Fi Connection. Operation is not allowed");
   printMainMenu();
   }
 }

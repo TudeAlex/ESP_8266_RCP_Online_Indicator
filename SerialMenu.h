@@ -1,7 +1,7 @@
 #ifndef SERIALMENU_H
 #define SERIALMENU_H
 
-#include <Arduino.h>
+
 #include "MyWiFi.h"
 
 
@@ -14,12 +14,11 @@ class SerialMenu
 
     MyWiFi& getWiFi();
     
-    void echoInput();
     void printMainMenu();
 
     void handleMainMenu();
-    void handleWifiSSIDMenu();
-    void handleWifiPASSMenu();
+    void handleWifiSsidMenu();
+    void handleWifiPasswordMenu();
     void handleEmailMenu();
     void handleEmailPasswordMenu();
     void handleWiFiConnection();

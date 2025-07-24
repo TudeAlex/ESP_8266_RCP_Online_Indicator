@@ -1,12 +1,14 @@
-#include "HardwareSerial.h"
-#include "core_esp8266_features.h"
-#include <ESP8266WiFi.h>
+//Libraries
+#include <WiFiClientSecure.h>
+#include <ESP8266HTTPClient.h>
+
+//Headers Files
 #include "SerialMenu.h"
 #include "MyWiFi.h"
 #include "DataStream.h"
-#include <WiFiClientSecure.h>
-#include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h>
+
+
+
 
 DataStream::DataStream(String ssid, String password, String email,String emailPassword, String status, String cookie, String csrf)
 : wifi_stream(ssid,password,email,emailPassword),status(status), cookie(cookie), csrf(csrf) {}
@@ -51,10 +53,12 @@ void DataStream:: rcpLoop()
   Serial.println("Enter q to leave");
   int i = 0;  
   login();
+  delay(1000);                                  
   login_check();
+  delay(1000);                                    
   two_auth_check();
-  delay(5000);
-  app();
+  delay(1000);                                    
+  app();                              // without this request you can have problems Code Status of getMyStatus0 is often 500 so you should use it
 
   while(i == 0 )
   {
@@ -87,24 +91,24 @@ void DataStream:: login()
   client.setInsecure(); 
 
   http.begin(client , "https://panel.rcponline.pl/login/");
-  http.addHeader("User-Agent","Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36");
+  http.addHeader("User-Agent","Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36");  
   
   const char* keys[] = {"Set-Cookie"};
   http.collectHeaders(keys,1);
 
   int httpCode = http.GET();
 
-  bool stateOfHeader = http.hasHeader("Set-Cookie");
-  Serial.println(stateOfHeader);
+  //bool stateOfHeader = http.hasHeader("Set-Cookie");          // very useful while debuging stateOfHeader = 0 if "Set-Cookie" header is not obtained, and stateOfHeader = 1 if is obtained
+  //Serial.println(stateOfHeader);                              //
   String csrf = "0";
     if (httpCode>0)
     {
       Serial.print("\n\rlogin :");
       Serial.println(httpCode);
       if (httpCode == HTTP_CODE_OK)
-      {
-        int len = http.getSize();
-
+      {                                                                         //
+        int len = http.getSize();                                               // because http.getString() is to large to be saved in ESP8266 memory you have to make smaller buffors to handle it 
+                                                                                //
         uint8_t buff[512] = { 0 };
 
 #if 0
@@ -138,35 +142,34 @@ void DataStream:: login()
         setCsrf(csrf);
       }
     } 
-}
+}                                                                                  
 
 void DataStream:: ledDriver()
 {
-  String employeeEvent = getStatus();
-  employeeEvent.trim();
-  Serial.println(employeeEvent);
-  if (employeeEvent == "1" )
+  String employeeStatus = getStatus();
+//  Serial.println(employeeStatus);           //Usefull while debugging  
+  if (employeeStatus == "1" )
   {
     digitalWrite(12,HIGH);
     digitalWrite(13,LOW);
     digitalWrite(14,LOW);
     digitalWrite(15,LOW);
   }
-  else if (employeeEvent == "2")
+  else if (employeeStatus == "2")
   {
     digitalWrite(12,LOW);
     digitalWrite(13,HIGH);
     digitalWrite(14,LOW);
     digitalWrite(15,LOW);
   }
-  else if (employeeEvent == "3" )
+  else if (employeeStatus == "3" )
   {
     digitalWrite(12,LOW);
     digitalWrite(13,LOW);
     digitalWrite(14,HIGH);
     digitalWrite(15,LOW);
   }
-  else if (employeeEvent == "4" )
+  else if (employeeStatus == "4" )
   {
     digitalWrite(12,LOW);
     digitalWrite(13,LOW);
@@ -174,26 +177,25 @@ void DataStream:: ledDriver()
     digitalWrite(15,HIGH);    
   }
 
-  delay(5);
 }
 
 String DataStream:: gettingCsrf(uint8_t* b)
 {
   String text = String((char*)b);
-  const String tag_csrf = "<input type=\"hidden\" name=\"_csrf_token\" id=\"_csrf_token\" " ; 
+  const String tagCsrf = "<input type=\"hidden\" name=\"_csrf_token\" id=\"_csrf_token\" " ;    /// im not proud of it 
 
-  String founded_csrf = "";
+  String foundedCsrf = "";
 
-  int start_tag_position = text.indexOf(tag_csrf);
+  int startTagPosition = text.indexOf(tagCsrf);
 
-  if (start_tag_position != -1)
+  if (startTagPosition != -1)
   {
-    int start_quotation_mark = text.indexOf('value="',start_tag_position);
-    int end_quotation_mark = text.indexOf('" />',start_quotation_mark +1);
-    if (start_quotation_mark != -1 && end_quotation_mark !=-1)
+    int startQuotationMark = text.indexOf('value="',startTagPosition);
+    int endQuotationMark = text.indexOf('" />',startQuotationMark +1);
+    if (startQuotationMark != -1 && endQuotationMark !=-1)
     {
-      String csrf_text = text.substring(64 + start_quotation_mark, end_quotation_mark -3);
-      return csrf_text;
+      String csrfText = text.substring(64 + startQuotationMark, endQuotationMark -3);
+      return csrfText;
     }
     else
     {
@@ -210,25 +212,25 @@ String DataStream:: gettingCookie(String b)
 {
 String tekst = b;
   
-  const String tag_Cookie = "PHPSESSID=";
-  const String tag_End_Cookie = "; expires";
+  const String tagCookie = "PHPSESSID=";
+  const String tagEndCookie = "; expires";
   
-  String znalezione_slowo = "";
+  String foundedCookie = "";
 
-  int start_pozycja_tagu = tekst.indexOf(tag_Cookie);
+  int startTagPosition = tekst.indexOf(tagCookie);
 
-  if (start_pozycja_tagu != -1) 
+  if (startTagPosition != -1) 
   {
-    int start_cudzyslowu = tekst.indexOf(tag_Cookie, start_pozycja_tagu);
-    int koniec_cudzyslowu = tekst.indexOf(tag_End_Cookie, start_cudzyslowu + 1);
+    int startQuotationMark = tekst.indexOf(tagCookie, startTagPosition);
+    int endQuotationMark = tekst.indexOf(tagEndCookie, startQuotationMark + 1);
 
-    if (start_cudzyslowu != -1 && koniec_cudzyslowu != -1) 
+    if (startQuotationMark != -1 && endQuotationMark != -1) 
     {
-      String cookie_text = tekst.substring(start_pozycja_tagu+10,koniec_cudzyslowu);
-      return cookie_text;
+      String cookieText = tekst.substring(startTagPosition+10,endQuotationMark);
+      return cookieText;
     }
   }
-  if (znalezione_slowo.length() > 0) {
+  if (foundedCookie.length() > 0) {
   }
     return "0";
 }
@@ -258,7 +260,7 @@ void DataStream:: login_check()
 
   if (httpCode > 0)
   {
-    Serial.print("\r\nlogin_check");
+    Serial.print("\r\nlogin_check Status Code : ");
     Serial.println((httpCode));
   }
 
@@ -279,7 +281,7 @@ void DataStream:: two_auth_check()
 
   if (httpCode > 0)
   {
-    Serial.print("\r\ntwo_auth_check:   ");
+    Serial.print("\r\ntwo_auth_check Status Code:   ");
     Serial.println((httpCode));
   }
 }
@@ -299,7 +301,7 @@ void DataStream:: app()
 
   if (httpCode > 0)
   {
-    Serial.print("\n\rapp:   ");
+    Serial.print("\n\rapp Status Code:   ");
     Serial.println(httpCode);
   }
 }
@@ -321,12 +323,12 @@ void DataStream:: getMyStatus0()
   String status = "0";
     if (httpCode>0)
     {
-      Serial.print("\n\rgetMyStatus0");
+      Serial.print("\n\rgetMyStatus0 Status Code:   ");
       Serial.println(httpCode);
-      String Status_Code = http.getString();
-      // String decodate_status = decodeUnicode(Status_Code);
-      // Serial.println(decodate_status);
-      Serial.print(extractPresenceStatus(Status_Code));
+      Serial.println("");
+      String pressenceStatus = http.getString();
+      Serial.println(extractPresenceStatus(pressenceStatus));
+      
   
     } 
 }   
@@ -351,6 +353,8 @@ String DataStream::decodeUnicode(String input)
 
 String DataStream :: extractPresenceStatus(String response) 
 {
+
+// Here you can add more Unicode signs if you use other language that Polish
     response.replace("\\u003C", "<");
     response.replace("\\u003E", ">");
     response.replace("\\u0022", "\"");
@@ -359,39 +363,40 @@ String DataStream :: extractPresenceStatus(String response)
     response.replace("\\u00f3", "ó");
     response.replace("\\u0142", "ł" );
     response.replace("\\u017c", "ż");
+//
 
-    const String start_marker = "<span class=\"fw-bolder fs-2\">";
-    const String end_marker = "<\\/span>"; 
+    const String tagStatus = "<span class=\"fw-bolder fs-2\">";
+    const String tagEndStatus = "<\\/span>"; 
 
-    int start_pos = response.indexOf(start_marker);
-    if (start_pos == -1) 
+    int startPosition = response.indexOf(tagStatus);
+    if (startPosition == -1) 
     {
       return "Blad: Nie znaleziono poczatku statusu";
     }
     
-    start_pos += start_marker.length();
+    startPosition += tagStatus.length();
 
-    int end_pos = response.indexOf(end_marker, start_pos);
-    if (end_pos == -1) 
+    int endPosition = response.indexOf(tagEndStatus, startPosition);
+    if (endPosition == -1) 
     {
-      return "Error"
+      return "Error";
     }
 
-    String raw_status = response.substring(start_pos+20, end_pos-42);
-    raw_status.trim();
-    if (raw_status == "Na stanowisku")
+    String rawStatus = response.substring(startPosition+20, endPosition-42);
+    rawStatus.trim();
+    if (rawStatus == "Na stanowisku")
     {
       setStatus("1");
     }
-    else if( raw_status =="Na przerwie")
+    else if( rawStatus =="Na przerwie")
     {
       setStatus("2");
     }
-    else if( raw_status == "Na wyjściu służbowym")
+    else if( rawStatus == "Na wyjściu służbowym")
     {
       setStatus("3");
     }
-    else if( raw_status == "Nie ma")
+    else if( rawStatus == "Nie ma")
     {
       setStatus("4");
     }
@@ -399,5 +404,5 @@ String DataStream :: extractPresenceStatus(String response)
     {
       setStatus("0");
     }
-    return raw_status;
+    return rawStatus;
 }

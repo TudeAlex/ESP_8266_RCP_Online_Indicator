@@ -22,11 +22,12 @@ void setup()
   digitalWrite(13,HIGH);
   digitalWrite(14,HIGH);
   digitalWrite(15,HIGH);
-
+  menu.handleWiFiConnection();
 }
 
 
 void loop()
-{    
-    menu.handleDataStream();
+{   
+    menu.handleDataStream();  //  *** commend it if you want to use menu in terminal ***
+//    menu.handleMainMenu();  //  *** if you want to use menu in terminal ***
 }

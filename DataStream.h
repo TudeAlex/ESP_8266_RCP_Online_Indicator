@@ -1,8 +1,6 @@
-#include "WString.h"
 #ifndef DATASTREAM_H
 #define DATASTREAM_H
 
-#include <Arduino.h>
 #include "MyWiFi.h"
 
 
