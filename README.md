@@ -1,6 +1,6 @@
   #ESP_8266_RCP_Online_Indicator 
 
-This project is designet to signal presence status with LED, using request to https://panel.rcponline.pl.
+This project is designed to signal presence status with LED, using request to https://panel.rcponline.pl.
 
 ## Author
 
@@ -51,32 +51,24 @@ Use this method if the device will operate on a single, unchanging network.
 2.  Connect the ESP8266 to your computer and select the correct COM port in `Tools > Port`.
 3.  Press the 'Upload' button.
 
-### BUILDING DEVICE
-
-Void for now.
-
 ### DEVICE OPERATION
 
 * Upon startup, **all LEDs will briefly light up**. [cite_start]This indicates that the device is attempting to connect to the network and retrieve the status[cite: 2].
 * After successfully retrieving the data, only **one LED** will remain lit, corresponding to your current status in RCP Online.
 * The status is automatically refreshed every 10 seconds.
 
-##connection between ESP8266 and LEDs
-- **On site** output 12
-- **On break** output 13
-- **On business exit** output 14
-- **Away** output 15
+##CONNECTION BETWEEN ESP8266 AND LEDs
 For user:
-- **On site** D6
-- **On break** D7
-- **On business exit** D5
-- **Away** D8
-It is recommended to use colors of LEDs corresponding to the colors assigned to statuses on the RCP website.
-- **On site** Green
-- **On break** Blue
-- **On business exit** Yellow
-- **Away** Red 
+- **On site** D6 , Green LED
+- **On break** D7 , Blue LED
+- **On business exit** D5 , Yellow LED
+- **Away** D8 , Red LED
 
+##ERRORS
+
+You can use serial monitor to track errors, some of them will be described here:
+
+* **app Status Code: 302** https://panel.rcponline.pl have security features that block the ability to log in to your account for 5 minutes if there are too many failed login attempts, so if you write something wrong in your credentials, device wont work for while, so be carefull while enterning your crendentials. This error will result with another error **getMyStatus Status Code: 500**.
 
 ## IMPORTANT
 

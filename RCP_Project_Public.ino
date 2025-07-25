@@ -29,5 +29,5 @@ void setup()
 void loop()
 {   
     menu.handleDataStream();  //  *** commend it if you want to use menu in terminal ***
-//    menu.handleMainMenu();  //  *** if you want to use menu in terminal ***
+//    menu.handleMainMenu();  //  *** uncommend it if you want to use menu in terminal ***
 }
