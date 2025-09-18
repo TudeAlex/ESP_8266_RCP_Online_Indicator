@@ -3,12 +3,12 @@
 #include "DataStream.h"
 #include "secrets.h"
 
-
+#define LED_PIN    5     
+#define LED_COUNT  12     
 
 SerialMenu::SerialMenu(String ssid, String password, String email, String emailPassword, String i)
 : wifi(ssid,password,email,emailPassword)
 {
-
   input = i;
 }
 
@@ -33,7 +33,6 @@ void SerialMenu::printMainMenu()
 
 void SerialMenu::handleMainMenu()
 {
-
   if (Serial.available() > 0) 
   { 
     String input = Serial.readStringUntil('\r');
@@ -221,17 +220,62 @@ void SerialMenu::handleWiFiConnection()
   WiFi.begin(WIFI_SSID ,WIFI_PASSWORD);  
   unsigned long start = millis();
   Serial.println("Connecting with Wi-Fi");
+  Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
   while (WiFi.status() != WL_CONNECTED && millis()-start < 20000)
   {
     Serial.print(".");
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(255, 0, 0)); 
+    }
+    strip.show();
+    delay(100);
+    Serial.print(".");
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(0, 255, 0)); 
+    }
+    strip.show();
+    delay(100);
+    Serial.print(".");
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(0, 0, 255)); 
+    }
+    strip.show();
     delay(100);
   }
   if(WiFi.status() == WL_CONNECTED)
   {
     Serial.println("Done\n");
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(255, 255, 255)); 
+    }
+    strip.show();
   }
   else
-  {
+  {    
+    Serial.println("Done\n");
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(255, 0, 255)); 
+    }
     Serial.println("Failed!");
   }
   // printMainMenu();  

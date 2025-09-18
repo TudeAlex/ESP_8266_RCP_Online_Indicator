@@ -1,8 +1,9 @@
+#include "WString.h"
 #ifndef DATASTREAM_H
 #define DATASTREAM_H
 
 #include "MyWiFi.h"
-
+#include <Adafruit_NeoPixel.h>
 
 
 class DataStream 
@@ -35,7 +36,8 @@ class DataStream
     void getMyStatus();
     void two_auth_check();
     void app();
-    void getMyStatus0();
+    int getMyStatus0();
+    void clockEventBreak();
     String extractPresenceStatus(String i);
     
     String gettingCsrf(uint8_t* b);

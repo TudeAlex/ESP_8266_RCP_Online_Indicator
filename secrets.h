@@ -1,6 +1,8 @@
 #ifndef SECRETS_H
 #define SECRETS_H
 
+extern const int LED_BRIGHTNES;
+
 extern const char* WIFI_SSID ;
 extern const char* WIFI_PASSWORD ;
 

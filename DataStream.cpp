@@ -1,3 +1,4 @@
+#include "WString.h"
 //Libraries
 #include <WiFiClientSecure.h>
 #include <ESP8266HTTPClient.h>
@@ -6,7 +7,10 @@
 #include "SerialMenu.h"
 #include "MyWiFi.h"
 #include "DataStream.h"
+#include "secrets.h"
 
+#define LED_PIN    5     
+#define LED_COUNT  12     
 
 
 
@@ -50,38 +54,23 @@ void DataStream:: setCsrf(String c)
 
 void DataStream:: rcpLoop()
 {
-  Serial.println("Enter q to leave");
-  int i = 0;  
-  login();
-  delay(1000);                                  
-  login_check();
-  delay(1000);                                    
-  two_auth_check();
-  delay(1000);                                    
-  app();                              // without this request you can have problems Code Status of getMyStatus0 is often 500 so you should use it
-
-  while(i == 0 )
+  while (1)
   {
-    if(Serial.available() > 0)
+    login();
+    delay(100);
+    login_check();
+    delay(100);
+    two_auth_check();
+    delay(100);
+    app();                              // without this request you can have problems Code Status of getMyStatus0 is often 500 so you should use it
+    int loop_status = getMyStatus0();
+    while (loop_status == 200)
     {
-      String quitInput = Serial.readStringUntil('\r');
-      if(quitInput = "q")
-      {
-        i++;
-        setStatus("0");
-      }
-      else {}
-    }
-    else 
-    {
-      getMyStatus0();
-      delay(500);
+      loop_status = getMyStatus0();
       ledDriver();
-      delay(10000);   
+      delay(5000);
     }
-
   }
-
 }
 
 void DataStream:: login()
@@ -146,35 +135,60 @@ void DataStream:: login()
 
 void DataStream:: ledDriver()
 {
+  Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
   String employeeStatus = getStatus();
 //  Serial.println(employeeStatus);           //Usefull while debugging  
   if (employeeStatus == "1" )
   {
-    digitalWrite(12,HIGH);
-    digitalWrite(13,LOW);
-    digitalWrite(14,LOW);
-    digitalWrite(15,LOW);
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+
+    // 
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(0, 255, 0)); 
+    }
+    strip.show();
   }
   else if (employeeStatus == "2")
   {
-    digitalWrite(12,LOW);
-    digitalWrite(13,HIGH);
-    digitalWrite(14,LOW);
-    digitalWrite(15,LOW);
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+
+    // 
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(0, 0, 255)); 
+    }
+    strip.show();
   }
   else if (employeeStatus == "3" )
   {
-    digitalWrite(12,LOW);
-    digitalWrite(13,LOW);
-    digitalWrite(14,HIGH);
-    digitalWrite(15,LOW);
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+
+    // 
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(255, 255, 0)); 
+    }
+    strip.show();
   }
   else if (employeeStatus == "4" )
   {
-    digitalWrite(12,LOW);
-    digitalWrite(13,LOW);
-    digitalWrite(14,LOW);
-    digitalWrite(15,HIGH);    
+    strip.begin();
+    strip.show();
+    strip.setBrightness(LED_BRIGHTNES);
+
+    // 
+    for (int i = 0; i < LED_COUNT; i++) 
+    {
+      strip.setPixelColor(i, strip.Color(255, 0, 0)); 
+    }
+    strip.show();
   }
 
 }
@@ -306,7 +320,7 @@ void DataStream:: app()
   }
 }
 
-void DataStream:: getMyStatus0()
+int DataStream:: getMyStatus0()
 {
   WiFiClientSecure client;
   HTTPClient http;
@@ -328,10 +342,47 @@ void DataStream:: getMyStatus0()
       Serial.println("");
       String pressenceStatus = http.getString();
       Serial.println(extractPresenceStatus(pressenceStatus));
-      
-  
-    } 
+    }
+  return httpCode;
 }   
+
+void DataStream:: clockEventBreak()
+{
+String payload = "empld=60431"
+                "&zone=2"
+                "&eventType=2"
+                "&comment="
+                "&project="
+                "&gps="
+                "&remote=0"
+                "&photo="
+                "&customTIme=";
+                   
+  WiFiClientSecure client;
+  HTTPClient http;
+  client.setInsecure(); 
+
+  http.begin(client , "https://panel.rcponline.pl/event/clockEvent");
+  http.addHeader("Cookie", "PHPSESSID=" + getCookie());
+  http.addHeader("User-Agent","Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36");
+  http.addHeader("Referer" , "https://panel.rcponline.pl/app/");
+  http.addHeader("Accept", "*/*");
+  http.addHeader("Accept-Encoding" , "gzip,deflate,br,zstd");
+  http.addHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+  http.addHeader("x-Request-With","XMLHttpRequest");
+  http.addHeader("Priority", "u=1,i");
+
+
+  int httpCode = http.POST(payload);
+
+  String status = "0";
+    if (httpCode>0)
+    {
+      Serial.print("\n\rclockEcent Code:   ");
+      Serial.println(httpCode);
+      Serial.println("");
+    }  
+}
 
 String DataStream::decodeUnicode(String input)
 {
@@ -385,6 +436,10 @@ String DataStream :: extractPresenceStatus(String response)
     String rawStatus = response.substring(startPosition+20, endPosition-42);
     rawStatus.trim();
     if (rawStatus == "Na stanowisku")
+    {
+      setStatus("1");
+    }
+    else if( rawStatus == "Praca zdalna")
     {
       setStatus("1");
     }
