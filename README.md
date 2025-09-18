@@ -75,7 +75,7 @@ You can use serial monitor to track errors, some of them will be described here:
 Code was used and tested only with Polish version of website, to make it work for English version it is necessary to modify the methods `extractPresenceStatus()` and `ledDriver()`
 
 
-## ADDING_FEATERS
+## ADDING_FEATURES
 
 Functions related to retrieving additional data from the RCP panel can be implemented by modifying the `extractPresenceStatus()` method. This method handles the response from the server when requesting the endpoint `GetMyStatus0`.
 
